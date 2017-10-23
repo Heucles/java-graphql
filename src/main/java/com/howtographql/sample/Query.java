@@ -5,7 +5,7 @@ import com.howtographql.sample.model.Link;
 import com.howtographql.sample.repository.LinkRepository;
 
 import java.util.List;
-
+// Aqui tem que estar na Raiz pois é o que é referenciado no arquivo schema como contendo as queries
 public class Query implements GraphQLRootResolver {
 
     private final LinkRepository linkRepository;

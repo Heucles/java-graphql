@@ -30,10 +30,10 @@ public class Mutation implements GraphQLRootResolver {
         throw new GraphQLException("Invalid Credentials");
     }
 
+    //The way to inject the context is via DataFetchingEnvironment
     public Link createLink(String url, String description, DataFetchingEnvironment env) {
-        //////AuthContext context = env.getContext();
-        Link newLink = new Link(url, description);
-                //, context.getUser().getId());
+        AuthContext context = env.getContext();
+        Link newLink = new Link(url, description, context.getUser().getId());
         linkRepository.saveLink(newLink);
         return newLink;
     }

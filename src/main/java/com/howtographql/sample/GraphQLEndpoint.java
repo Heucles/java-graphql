@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.howtographql.sample.model.User;
 import com.howtographql.sample.repository.LinkRepository;
+import com.howtographql.sample.resolver.LinkResolver;
 import com.howtographql.sample.resolver.SigninResolver;
 import com.howtographql.sample.repository.UserRepository;
 import com.mongodb.MongoClient;
@@ -40,20 +41,22 @@ public class GraphQLEndpoint extends SimpleGraphQLServlet {
                 .file("schema.graphqls")
                 .resolvers(new Query(linkRepository),
                         new Mutation(linkRepository, userRepository),
-                        new SigninResolver())
+                        new SigninResolver(),
+                        new LinkResolver(userRepository))
                 .build()
                 .makeExecutableSchema();
     }
 
-//    // Precisa desse override para poder validar os requests que tem o header de authorization e os que não
-//    @Override
-//    protected GraphQLContext createContext(Optional<HttpServletRequest> request, Optional<HttpServletResponse> response) {
-//        User user = request
-//                .map(req -> req.getHeader("Authorization"))
-//                .filter(id -> !id.isEmpty())
-//                .map(id -> id.replace("Bearer ", ""))
-//                .map(userRepository::findById)
-//                .orElse(null);
-//        return new AuthContext(user, request, response);
-//    }
+    // Precisa desse override para poder validar os requests que tem o header de authorization e os que não
+    @Override
+    protected GraphQLContext createContext(Optional<HttpServletRequest> request, Optional<HttpServletResponse> response) {
+        User user = request
+                .map(req -> req.getHeader("Authorization"))
+                .filter(id -> !id.isEmpty())
+                .map(id -> id.replace("Bearer ", ""))
+                .map(userRepository::findById)
+                .orElse(null);
+        return new AuthContext(user, request, response);
+    }
+
 }

@@ -12,24 +12,21 @@ public class LinkRepository {
 
     private final MongoCollection<Document> links;
 
-    private Link link(Document doc) {
-        return new Link(
-                doc.get("_id").toString(),
-                doc.getString("url"),
-                doc.getString("description"));
-    }
-
     public LinkRepository(MongoCollection<Document> links) {
         this.links = links;
     }
 
     public List<Link> getAllLinks() {
-        List<Link> allLinks = new ArrayList<Link>();
-        for (Document doc :
-                this.links.find()) {
-            allLinks.add(link(doc));
+        List<Link> allLinks = new ArrayList<>();
+        for (Document doc : links.find()) {
+            Link link = new Link(
+                    doc.get("_id").toString(),
+                    doc.getString("url"),
+                    doc.getString("description"),
+                    doc.getString("postedBy")
+            );
+            allLinks.add(link);
         }
-
         return allLinks;
     }
 
@@ -37,6 +34,7 @@ public class LinkRepository {
         Document doc = new Document();
         doc.append("url", link.getUrl());
         doc.append("description", link.getDescription());
-        this.links.insertOne(doc);
+        doc.append("postedBy", link.getUserId());
+        links.insertOne(doc);
     }
 }

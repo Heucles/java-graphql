@@ -29,7 +29,7 @@ scalar DateTime
 
 
 type Query {
-  allLinks: [Link]
+  allLinks(filter: LinkFilter): [Link]
 }
 
 
@@ -49,6 +49,11 @@ type Mutation {
 input AuthData {
   email: String!
   password: String!
+}
+
+input LinkFilter {
+  description_contains: String
+  url_contains: String
 }
 
 

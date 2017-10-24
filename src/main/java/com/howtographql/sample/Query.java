@@ -2,6 +2,7 @@ package com.howtographql.sample;
 
 import com.coxautodev.graphql.tools.GraphQLRootResolver;
 import com.howtographql.sample.model.Link;
+import com.howtographql.sample.model.LinkFilter;
 import com.howtographql.sample.repository.LinkRepository;
 
 import java.util.List;
@@ -14,7 +15,7 @@ public class Query implements GraphQLRootResolver {
         this.linkRepository = linkRepository;
     }
 
-    public List<Link> allLinks() {
-        return linkRepository.getAllLinks();
+    public List<Link> allLinks(LinkFilter filter) {
+        return linkRepository.getAllLinks(filter);
     }
 }

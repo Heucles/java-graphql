@@ -6,6 +6,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.howtographql.sample.model.Link;
 import com.howtographql.sample.model.User;
 import com.howtographql.sample.repository.LinkRepository;
 import com.howtographql.sample.repository.VoteRepository;
@@ -15,11 +16,16 @@ import com.howtographql.sample.repository.UserRepository;
 import com.howtographql.sample.resolver.VoteResolver;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoDatabase;
+import graphql.ExceptionWhileDataFetching;
+import graphql.GraphQL;
+import graphql.GraphQLError;
 import graphql.schema.GraphQLSchema;
 import graphql.servlet.GraphQLContext;
 import graphql.servlet.SimpleGraphQLServlet;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 @WebServlet(urlPatterns = "/graphql")
@@ -63,6 +69,15 @@ public class GraphQLEndpoint extends SimpleGraphQLServlet {
                 .map(userRepository::findById)
                 .orElse(null);
         return new AuthContext(user, request, response);
+    }
+
+    @Override
+    protected List<GraphQLError> filterGraphQLErrors(List<GraphQLError> errors){
+        return errors.stream()
+                .filter(e->e instanceof ExceptionWhileDataFetching || super.isClientError(e))
+                .map(e->e instanceof ExceptionWhileDataFetching ?
+                        new SanitizedError((ExceptionWhileDataFetching)e):e)
+                .collect(Collectors.toList());
     }
 
 }

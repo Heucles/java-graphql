@@ -2,6 +2,7 @@ package com.howtographql.sample.repository;
 
 import com.howtographql.sample.model.Link;
 import com.howtographql.sample.model.LinkFilter;
+import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import org.bson.Document;
 import org.bson.conversions.Bson;
@@ -35,13 +36,12 @@ public class LinkRepository {
         this.links = links;
     }
 
-    public List<Link> getAllLinks(LinkFilter filter) {
+    public List<Link> getAllLinks(LinkFilter filter, int skip, int first) {
         Optional<Bson> mongoFilter = Optional.ofNullable(filter).map(this::buildFilter);
-
+        FindIterable<Document> filteredDocuments = mongoFilter.map(links::find).orElseGet(links::find);
         List<Link> allLinks = new ArrayList<>();
-        for (Document doc : mongoFilter.map(links::find).orElseGet(links::find)) {
-            Link link = createLink(doc);
-            allLinks.add(link);
+        for (Document doc : filteredDocuments.skip(skip).limit(first)) {
+            allLinks.add(createLink(doc));
         }
         return allLinks;
     }

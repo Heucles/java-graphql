@@ -1,7 +1,5 @@
 package com.howtographql.sample;
 
-import com.coxautodev.graphql.tools.SchemaParser;
-
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -22,6 +20,7 @@ import graphql.GraphQLError;
 import graphql.schema.GraphQLSchema;
 import graphql.servlet.GraphQLContext;
 import graphql.servlet.SimpleGraphQLServlet;
+import io.leangen.graphql.GraphQLSchemaGenerator;
 
 import java.util.List;
 import java.util.Optional;
@@ -47,16 +46,14 @@ public class GraphQLEndpoint extends SimpleGraphQLServlet {
     }
 
     private static GraphQLSchema buildSchema() {
-        return SchemaParser.newParser()
-                .file("schema.graphqls")
-                .resolvers(new Query(linkRepository),
-                        new Mutation(linkRepository, userRepository, voteRepository),
-                        new SigninResolver(),
-                        new LinkResolver(userRepository),
-                        new VoteResolver(linkRepository, userRepository))
-                .scalars(Scalars.dateTime) //register the new scalar
-                .build()
-                .makeExecutableSchema();
+        //create or inject the service beans
+        Query query = new Query(linkRepository);
+        LinkResolver linkResolver = new LinkResolver(userRepository);
+        Mutation mutation = new Mutation(linkRepository, userRepository, voteRepository);
+
+        return new GraphQLSchemaGenerator()
+                .withOperationsFromSingletons(query,linkResolver,mutation) // registering the beans
+                .generate(); //done
     }
 
     // Precisa desse override para poder validar os requests que tem o header de authorization e os que não
